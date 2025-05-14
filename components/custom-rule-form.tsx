@@ -129,7 +129,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
 
     // Check if fixed amounts exceed test income
     if (totalFixedAmount > testIncome) {
-      setError(`Fixed amounts total $${totalFixedAmount} which exceeds the test income of $${testIncome}`)
+      setError(`Fixed amounts total €${totalFixedAmount} which exceeds the test income of €${testIncome}`)
       return false
     }
 
@@ -346,7 +346,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
 
           <div className="p-4 bg-gray-50 rounded-md space-y-2">
             <div className="text-sm">
-              <span className="font-medium">Fixed Amounts:</span> ${totalFixedAmount.toFixed(2)}
+              <span className="font-medium">Fixed Amounts:</span> €{totalFixedAmount.toFixed(2)}
               <span className="text-gray-500 ml-1">({percentageUsedByFixed.toFixed(1)}% of test income)</span>
             </div>
             <div className="text-sm">
@@ -354,7 +354,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
               {totalPercentage === 100 && <span className="text-green-500 ml-2">✓</span>}
             </div>
             <div className="text-sm">
-              <span className="font-medium">Remaining for Percentages:</span> $
+              <span className="font-medium">Remaining for Percentages:</span> €
               {(testIncome - totalFixedAmount).toFixed(2)}
               <span className="text-gray-500 ml-1">({(100 - percentageUsedByFixed).toFixed(1)}% of test income)</span>
             </div>
@@ -365,7 +365,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
         <Button variant="outline" onClick={onSave}>
           <X className="h-4 w-4 mr-2" /> Cancel
         </Button>
-        <Button onClick={handleSave}>
+        <Button onClick={handleSave} className="bg-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
           <Save className="h-4 w-4 mr-2" /> Save Rule
         </Button>
       </CardFooter>

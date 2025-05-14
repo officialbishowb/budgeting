@@ -105,38 +105,39 @@ export default function Results() {
 
   const getRuleDescription = (ruleId: string) => {
     switch (ruleId) {
-      case "50-30-20":
-        return "50% for needs, 30% for wants, and 20% for savings"
-      case "25-50-15-10":
-        return "25% for housing, 50% for necessities, 15% for savings, and 10% for fun"
-      case "60-20-20":
-        return "60% for living expenses, 20% for savings & debt, and 20% for personal spending"
-      case "70-20-10":
-        return "70% for living expenses, 20% for savings, and 10% for giving"
-      default:
-        return "Custom budget rule"
-    }
+        case "50-30-20":
+          return "50% for needs (essential expenses), 30% for wants (non-essential spending), and 20% for savings or debt repayment";
+      
+        case "25-50-15-10":
+          return "25% for housing, 50% for necessities (including housing, food, transportation), 15% for savings or investments, and 10% for fun or leisure";
+      
+        case "60-20-20":
+          return "60% for living expenses (all essential and some discretionary), 20% for savings and debt repayment, and 20% for personal spending (e.g., entertainment, hobbies)";
+      
+        case "70-20-10":
+          return "70% for living expenses, 20% for savings or investments, and 10% for savings.";
+      }
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-4 sm:p-6 bg-gradient-to-b from-green-50 to-blue-50">
+    <main className="flex min-h-screen flex-col items-center p-4 sm:p-6 bg-[#1C1B22]">
       <div className="w-full max-w-4xl">
         <div className="flex justify-between items-center mb-4">
           <Link href="/">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="border-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
           </Link>
           <div className="flex gap-2">
             <Link href="/custom-rules">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="border-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
                 <Settings className="mr-2 h-4 w-4" />
                 Manage Rules
               </Button>
             </Link>
             <Link href="/">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="bg-white border-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
                 <Home className="mr-2 h-4 w-4" />
                 Home
               </Button>
@@ -144,10 +145,10 @@ export default function Results() {
           </div>
         </div>
 
-        <Card className="mb-6">
+        <Card className="mb-6 bg-[#1C1B22] border-[#96DAAF]">
           <CardHeader>
-            <CardTitle className="text-xl">Your Budget Breakdown</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl text-[#96DAAF]">Your Budget Breakdown</CardTitle>
+            <CardDescription className="text-[#96DAAF]/80">
               {getFrequencyText()} income: €{income.toLocaleString()}
             </CardDescription>
           </CardHeader>
@@ -156,13 +157,13 @@ export default function Results() {
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="relative mb-4">
             <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
-              <TabsList className="flex flex-wrap sm:flex-nowrap w-full gap-2 border rounded-lg p-2 sm:border-none sm:rounded-none sm:p-0">
+              <TabsList className="flex flex-wrap sm:flex-nowrap w-full gap-2 border rounded-lg p-2 sm:border-none sm:rounded-none sm:p-0 bg-[#1C1B22] border-[#96DAAF]">
                 {/* Predefined rules */}
                 {Object.keys(predefinedRules).map((ruleId) => (
                   <TabsTrigger 
                     key={ruleId} 
                     value={ruleId} 
-                    className="flex-1 sm:flex-none min-w-[120px] text-center py-3 sm:py-2 px-3 text-sm whitespace-nowrap"
+                    className="flex-1 sm:flex-none min-w-[120px] text-center py-3 sm:py-2 px-3 text-sm whitespace-nowrap text-[#96DAAF] data-[state=active]:bg-[#96DAAF] data-[state=active]:text-[#1C1B22]"
                   >
                     {ruleId.replace(/-/g, "/")} Rule
                   </TabsTrigger>
@@ -173,7 +174,7 @@ export default function Results() {
                   <TabsTrigger 
                     key={rule.id} 
                     value={rule.id} 
-                    className="flex-1 sm:flex-none min-w-[120px] text-center py-3 sm:py-2 px-3 text-sm whitespace-nowrap"
+                    className="flex-1 sm:flex-none min-w-[120px] text-center py-3 sm:py-2 px-3 text-sm whitespace-nowrap text-[#96DAAF] data-[state=active]:bg-[#96DAAF] data-[state=active]:text-[#1C1B22]"
                   >
                     {rule.name}
                   </TabsTrigger>
@@ -184,10 +185,10 @@ export default function Results() {
 
           {Object.entries(allRules).map(([ruleId, categories]) => (
             <TabsContent key={ruleId} value={ruleId} className="space-y-4">
-              <Card>
+              <Card className="bg-[#1C1B22] border-[#96DAAF]">
                 <CardHeader>
-                  <CardTitle className="text-lg">{getRuleName(ruleId)}</CardTitle>
-                  <CardDescription className="text-sm">{getRuleDescription(ruleId)}</CardDescription>
+                  <CardTitle className="text-lg text-[#96DAAF]">{getRuleName(ruleId)}</CardTitle>
+                  <CardDescription className="text-[#96DAAF]/80">{getRuleDescription(ruleId)}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
                   <div className="w-full overflow-x-auto">
@@ -205,7 +206,6 @@ export default function Results() {
             </TabsContent>
           ))}
         </Tabs>
-
       </div>
     </main>
   )

@@ -24,7 +24,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-green-50 to-blue-50">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 bg-[#1C1B22]">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-between items-center">
@@ -69,7 +69,7 @@ export default function Home() {
                     type="button"
                     variant={frequency === option ? "default" : "outline"}
                     onClick={() => setFrequency(option)}
-                    className="capitalize h-12 text-base"
+                    className="capitalize h-12 text-base bg-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF] hover:text-[#1C1B22]"
                   >
                     {option}
                   </Button>
@@ -78,7 +78,7 @@ export default function Home() {
             </div>
           </CardContent>
           <CardFooter className="pb-6">
-            <Button type="submit" className="w-full h-12 text-lg font-medium">
+            <Button type="submit" className="w-full h-12 text-lg font-medium bg-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
               Calculate Budget Splits
             </Button>
           </CardFooter>

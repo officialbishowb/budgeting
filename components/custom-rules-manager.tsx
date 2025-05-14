@@ -72,17 +72,17 @@ export default function CustomRulesManager() {
       ) : (
         <>
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold">Custom Budget Rules</h2>
-            <Button onClick={() => setShowForm(true)}>
+            <h2 className="text-xl font-bold text-[#96DAAF]">Custom Budget Rules</h2>
+            <Button onClick={() => setShowForm(true)} className="bg-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
               <Plus className="h-4 w-4 mr-2" /> Create New Rule
             </Button>
           </div>
 
           {customRules.length === 0 ? (
             <Card>
-              <CardContent className="p-6 text-center text-gray-500">
+              <CardContent className="p-6 text-center">
                 <p>You haven't created any custom budget rules yet.</p>
-                <Button variant="outline" className="mt-4" onClick={() => setShowForm(true)}>
+                <Button variant="outline" className="mt-4 bg-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]" onClick={() => setShowForm(true)}>
                   <Plus className="h-4 w-4 mr-2" /> Create Your First Rule
                 </Button>
               </CardContent>
