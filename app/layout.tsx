@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Budget Planner',
-  description: 'Plan and manage your budget with ease',
+  title: 'Budget Splitter',
+  description: 'Split your income with ease using various budget rules',
   icons: {
     icon: [
       {
@@ -15,6 +15,7 @@ export const metadata: Metadata = {
       },
     ],
   },
+  manifest: '/manifest.json',
 }
 
 export default function RootLayout({
