@@ -155,57 +155,58 @@ export default function Results() {
         </Card>
 
         <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="relative mb-4">
-            <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
-              <TabsList className="flex flex-wrap sm:flex-nowrap w-full gap-2 border rounded-lg p-2 sm:border-none sm:rounded-none sm:p-0 bg-[#1C1B22] border-[#96DAAF]">
-                {/* Predefined rules */}
-                {Object.keys(predefinedRules).map((ruleId) => (
-                  <TabsTrigger 
-                    key={ruleId} 
-                    value={ruleId} 
-                    className="flex-1 sm:flex-none min-w-[120px] text-center py-3 sm:py-2 px-3 text-sm whitespace-nowrap text-[#96DAAF] data-[state=active]:bg-[#96DAAF] data-[state=active]:text-[#1C1B22]"
-                  >
-                    {ruleId.replace(/-/g, "/")} Rule
-                  </TabsTrigger>
-                ))}
+  <div className="relative mb-4">
+    <div className="pb-2 sm:mx-0 sm:px-0 no-scrollbar">
+      <TabsList className="flex flex-col sm:flex-row gap-2 border rounded-lg p-2 sm:border-none sm:rounded-none sm:p-0 bg-[#1C1B22] border-[#96DAAF] w-full sm:w-auto h-60 lg:h-auto md:h-auto xl:h-auto sm:h-auto overflow-y-auto">
+        {/* Predefined rules */}
+        {Object.keys(predefinedRules).map((ruleId) => (
+          <TabsTrigger 
+            key={ruleId} value={ruleId} 
+            className="w-full sm:w-auto min-w-max px-4 py-2 text-sm text-[#96DAAF] text-center whitespace-nowrap data-[state=active]:bg-[#96DAAF] data-[state=active]:text-[#1C1B22] rounded-md border border-[#96DAAF]"
+          >
+            {ruleId.replace(/-/g, "/")} Rule
+          </TabsTrigger>
+        ))}
 
-                {/* Custom rules */}
-                {customRules.map((rule) => (
-                  <TabsTrigger 
-                    key={rule.id} 
-                    value={rule.id} 
-                    className="flex-1 sm:flex-none min-w-[120px] text-center py-3 sm:py-2 px-3 text-sm whitespace-nowrap text-[#96DAAF] data-[state=active]:bg-[#96DAAF] data-[state=active]:text-[#1C1B22]"
-                  >
-                    {rule.name}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+        {/* Custom rules */}
+        {customRules.map((rule) => (
+          <TabsTrigger 
+            key={rule.id} 
+            value={rule.id} 
+            className="w-full sm:w-auto min-w-max px-4 py-2 text-sm text-[#96DAAF] text-center whitespace-nowrap data-[state=active]:bg-[#96DAAF] data-[state=active]:text-[#1C1B22] rounded-md border border-[#96DAAF]"
+          >
+            {rule.name}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </div>
+  </div>
+
+  {Object.entries(allRules).map(([ruleId, categories]) => (
+    <TabsContent key={ruleId} value={ruleId} className="space-y-4">
+      <Card className="bg-[#1C1B22] border-[#96DAAF]">
+        <CardHeader>
+          <CardTitle className="text-lg text-[#96DAAF]">{getRuleName(ruleId)}</CardTitle>
+          <CardDescription className="text-[#96DAAF]/80">{getRuleDescription(ruleId)}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="w-full overflow-x-auto">
+            <div className="min-w-[300px]">
+              <BudgetChart categories={categories} income={income} />
             </div>
           </div>
+          <div className="w-full overflow-x-auto">
+            <div className="min-w-[300px]">
+              <BudgetBreakdown categories={categories} income={income} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </TabsContent>
+  ))}
+</Tabs>
 
-          {Object.entries(allRules).map(([ruleId, categories]) => (
-            <TabsContent key={ruleId} value={ruleId} className="space-y-4">
-              <Card className="bg-[#1C1B22] border-[#96DAAF]">
-                <CardHeader>
-                  <CardTitle className="text-lg text-[#96DAAF]">{getRuleName(ruleId)}</CardTitle>
-                  <CardDescription className="text-[#96DAAF]/80">{getRuleDescription(ruleId)}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-4">
-                  <div className="w-full overflow-x-auto">
-                    <div className="min-w-[300px]">
-                      <BudgetChart categories={categories} income={income} />
-                    </div>
-                  </div>
-                  <div className="w-full overflow-x-auto">
-                    <div className="min-w-[300px]">
-                      <BudgetBreakdown categories={categories} income={income} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
-        </Tabs>
+
       </div>
     </main>
   )
