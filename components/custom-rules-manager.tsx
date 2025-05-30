@@ -119,15 +119,15 @@ export default function CustomRulesManager() {
             throw new Error("Invalid format")
           }
 
-          // Validate each rule has required properties
+// Validate each rule has required properties
           const isValid = importedRules.every(rule => 
             rule.id && 
             rule.name && 
             Array.isArray(rule.categories) &&
             rule.categories.every((cat: Category) => 
               cat.name && 
-              typeof cat.percentage === 'number' &&
-              typeof cat.fixedAmount === 'number' &&
+             typeof cat.percentage === 'number' && cat.percentage >= 0 && cat.percentage <= 100 &&
+             typeof cat.fixedAmount === 'number' && cat.fixedAmount >= 0 &&
               typeof cat.isFixed === 'boolean' &&
               cat.color
             )
