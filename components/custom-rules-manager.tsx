@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Edit, Trash2, Euro, Percent } from "lucide-react"
+import { Plus, Edit, Trash2, Euro, Percent, Download, Upload } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import CustomRuleForm from "./custom-rule-form"
 
@@ -65,6 +65,113 @@ export default function CustomRulesManager() {
     loadCustomRules()
   }
 
+  const handleExport = () => {
+    try {
+      const rulesJSON = localStorage.getItem("customBudgetRules")
+      if (!rulesJSON) {
+        toast({
+          title: "No rules to export",
+          description: "You haven't created any custom budget rules yet",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const blob = new Blob([rulesJSON], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "custom-budget-rules.json"
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast({
+        title: "Rules exported",
+        description: "Your custom budget rules have been exported successfully",
+      })
+    } catch (e) {
+      console.error("Error exporting rules:", e)
+      toast({
+        title: "Export failed",
+        description: "There was an error exporting your rules",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleImport = () => {
+    const input = document.createElement("input")
+    input.type = "file"
+    input.accept = ".json"
+    
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          const importedRules = JSON.parse(event.target?.result as string)
+          
+          if (!Array.isArray(importedRules)) {
+            throw new Error("Invalid format")
+          }
+
+          // Validate each rule has required properties
+          const isValid = importedRules.every(rule => 
+            rule.id && 
+            rule.name && 
+            Array.isArray(rule.categories) &&
+            rule.categories.every((cat: Category) => 
+              cat.name && 
+              typeof cat.percentage === 'number' &&
+              typeof cat.fixedAmount === 'number' &&
+              typeof cat.isFixed === 'boolean' &&
+              cat.color
+            )
+          )
+
+          if (!isValid) {
+            throw new Error("Invalid rule format")
+          }
+
+          // Get existing rules
+          const existingRulesJSON = localStorage.getItem("customBudgetRules")
+          const existingRules = existingRulesJSON ? JSON.parse(existingRulesJSON) : []
+
+          // Merge rules, avoiding duplicates based on id
+          const mergedRules = [...existingRules]
+          importedRules.forEach(importedRule => {
+            if (!mergedRules.some(existingRule => existingRule.id === importedRule.id)) {
+              mergedRules.push(importedRule)
+            }
+          })
+
+          // Save merged rules
+          localStorage.setItem("customBudgetRules", JSON.stringify(mergedRules))
+          setCustomRules(mergedRules)
+
+          toast({
+            title: "Rules imported",
+            description: "Your custom budget rules have been imported successfully",
+          })
+        } catch (e) {
+          console.error("Error importing rules:", e)
+          toast({
+            title: "Import failed",
+            description: "The file format is invalid or corrupted",
+            variant: "destructive",
+          })
+        }
+      }
+      reader.readAsText(file)
+    }
+
+    input.click()
+  }
+
   return (
     <div className="space-y-4">
       {showForm ? (
@@ -73,9 +180,17 @@ export default function CustomRulesManager() {
         <>
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold text-[#96DAAF]">Custom Budget Rules</h2>
-            <Button onClick={() => setShowForm(true)} className="bg-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
-              <Plus className="h-4 w-4 mr-2" /> Create New Rule
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleExport} variant="outline" className="border-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
+                <Download className="h-4 w-4 mr-2" /> Export Rules
+              </Button>
+              <Button onClick={handleImport} variant="outline" className="border-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
+                <Upload className="h-4 w-4 mr-2" /> Import Rules
+              </Button>
+              <Button onClick={() => setShowForm(true)} className="bg-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
+                <Plus className="h-4 w-4 mr-2" /> Create New Rule
+              </Button>
+            </div>
           </div>
 
           {customRules.length === 0 ? (
