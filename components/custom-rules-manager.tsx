@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Edit, Trash2, Euro, Percent, Download, Upload } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 import CustomRuleForm from "./custom-rule-form"
 
 interface Category {
@@ -22,7 +23,6 @@ interface CustomRule {
 }
 
 export default function CustomRulesManager() {
-  const { toast } = useToast()
   const [customRules, setCustomRules] = useState<CustomRule[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingRule, setEditingRule] = useState<CustomRule | null>(null)
@@ -48,9 +48,13 @@ export default function CustomRulesManager() {
     const updatedRules = customRules.filter((rule) => rule.id !== ruleId)
     localStorage.setItem("customBudgetRules", JSON.stringify(updatedRules))
     setCustomRules(updatedRules)
-    toast({
-      title: "Rule deleted",
-      description: "The custom budget rule has been deleted",
+    toast.error("The custom budget rule has been deleted", {
+      position: "bottom-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
     })
   }
 
@@ -69,10 +73,13 @@ export default function CustomRulesManager() {
     try {
       const rulesJSON = localStorage.getItem("customBudgetRules")
       if (!rulesJSON) {
-        toast({
-          title: "No rules to export",
-          description: "You haven't created any custom budget rules yet",
-          variant: "destructive",
+        toast.warning("You haven't created any custom budget rules yet", {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
         })
         return
       }
@@ -87,16 +94,23 @@ export default function CustomRulesManager() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast({
-        title: "Rules exported",
-        description: "Your custom budget rules have been exported successfully",
+      toast.success("Your custom budget rules have been exported successfully", {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
       })
     } catch (e) {
       console.error("Error exporting rules:", e)
-      toast({
-        title: "Export failed",
-        description: "There was an error exporting your rules",
-        variant: "destructive",
+      toast.error("There was an error exporting your rules", {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
       })
     }
   }
@@ -119,15 +133,15 @@ export default function CustomRulesManager() {
             throw new Error("Invalid format")
           }
 
-// Validate each rule has required properties
+          // Validate each rule has required properties
           const isValid = importedRules.every(rule => 
             rule.id && 
             rule.name && 
             Array.isArray(rule.categories) &&
             rule.categories.every((cat: Category) => 
               cat.name && 
-             typeof cat.percentage === 'number' && cat.percentage >= 0 && cat.percentage <= 100 &&
-             typeof cat.fixedAmount === 'number' && cat.fixedAmount >= 0 &&
+              typeof cat.percentage === 'number' && cat.percentage >= 0 && cat.percentage <= 100 &&
+              typeof cat.fixedAmount === 'number' && cat.fixedAmount >= 0 &&
               typeof cat.isFixed === 'boolean' &&
               cat.color
             )
@@ -153,16 +167,23 @@ export default function CustomRulesManager() {
           localStorage.setItem("customBudgetRules", JSON.stringify(mergedRules))
           setCustomRules(mergedRules)
 
-          toast({
-            title: "Rules imported",
-            description: "Your custom budget rules have been imported successfully",
+          toast.success("Your custom budget rules have been imported successfully", {
+            position: "bottom-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
           })
         } catch (e) {
           console.error("Error importing rules:", e)
-          toast({
-            title: "Import failed",
-            description: "The file format is invalid or corrupted",
-            variant: "destructive",
+          toast.error("The file format is invalid or corrupted", {
+            position: "bottom-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
           })
         }
       }
