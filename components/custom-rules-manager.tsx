@@ -178,16 +178,16 @@ export default function CustomRulesManager() {
         <CustomRuleForm onSave={handleFormClose} editingRule={editingRule} />
       ) : (
         <>
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-xl font-bold text-[#96DAAF]">Custom Budget Rules</h2>
-            <div className="flex gap-2">
-              <Button onClick={handleExport} variant="outline" className="border-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+              <Button onClick={handleExport} variant="outline" className="border-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF] flex-1 sm:flex-none">
                 <Download className="h-4 w-4 mr-2" /> Export Rules
               </Button>
-              <Button onClick={handleImport} variant="outline" className="border-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
+              <Button onClick={handleImport} variant="outline" className="border-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF] flex-1 sm:flex-none">
                 <Upload className="h-4 w-4 mr-2" /> Import Rules
               </Button>
-              <Button onClick={() => setShowForm(true)} className="bg-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
+              <Button onClick={() => setShowForm(true)} className="bg-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF] flex-1 sm:flex-none">
                 <Plus className="h-4 w-4 mr-2" /> Create New Rule
               </Button>
             </div>
