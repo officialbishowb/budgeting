@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Euro, Settings, Loader2 } from "lucide-react"
+import { Euro, Settings, Loader2, ChevronRight } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function Home() {
   const [income, setIncome] = useState("")
@@ -28,33 +29,51 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 bg-[#1C1B22]">
-      <Card className="w-full max-w-md shadow-2xl rounded-2xl border-l-8 border-[#96DAAF] bg-[#F8F8F6]">
-        <CardHeader className="text-center pb-2">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl font-serif font-bold text-[#1C1B22]">Budget Splitter</CardTitle>
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 bg-background">
+       <div className="flex justify-center items-center mb-8 z-10">
+        <Image
+          src="/budgeting.png"
+          alt="Logo"
+          width={200}
+          height={200}
+        />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
+      
+     
+      <Card className="relative w-full max-w-lg backdrop-blur-sm bg-card/95 shadow-2xl border border-border/50">
+        <CardHeader className="text-center space-y-4 pb-6">
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Budgeting
+              </CardTitle>
+              <CardDescription className="text-muted-foreground mt-2">
+                Enter your income to see how it breaks down using different budgeting rules
+              </CardDescription>
+            </div>
             <Link href="/custom-rules">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="hover:bg-accent/10 hover:text-accent">
                 <Settings className="h-5 w-5" />
               </Button>
             </Link>
           </div>
-          <CardDescription className="font-serif text-[#1C1B22]/70">Enter your income to see how it breaks down using different budgeting rules</CardDescription>
         </CardHeader>
+        
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-6 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="income" className="text-base font-serif text-[#1C1B22]">
+          <CardContent className="space-y-8">
+            <div className="space-y-3">
+              <Label htmlFor="income" className="text-sm font-medium text-foreground">
                 Income Amount
               </Label>
               <div className="relative">
-                <Euro className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <Euro className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="income"
                   type="number"
                   inputMode="decimal"
                   placeholder="Enter your income"
-                  className="pl-10 h-12 text-lg bg-white border-[#96DAAF] text-[#1C1B22]"
+                  className="pl-12 h-14 text-lg bg-input border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   value={income}
                   onChange={(e) => setIncome(e.target.value)}
                   required
@@ -62,18 +81,22 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="frequency" className="text-base font-serif text-[#1C1B22]">
+            <div className="space-y-3">
+              <Label htmlFor="frequency" className="text-sm font-medium text-foreground">
                 Income Frequency
               </Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 {["monthly"].map((option) => (
                   <Button
                     key={option}
                     type="button"
                     variant={frequency === option ? "default" : "outline"}
                     onClick={() => setFrequency(option)}
-                    className={`capitalize h-12 text-base border-[#96DAAF] ${frequency === option ? "bg-[#96DAAF] text-[#1C1B22]" : "bg-white text-[#1C1B22]"}`}
+                    className={`capitalize h-12 text-base transition-all duration-200 ${
+                      frequency === option 
+                        ? "bg-primary text-primary-foreground shadow-md" 
+                        : "bg-background hover:bg-accent/10 hover:text-accent border-border"
+                    }`}
                   >
                     {option}
                   </Button>
@@ -81,10 +104,26 @@ export default function Home() {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="pb-6">
-            <Button type="submit" className="w-full h-12 text-lg font-medium bg-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF] flex items-center justify-center" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin mr-2 h-5 w-5" /> : null}
-              {loading ? "Calculating..." : "Calculate Budget Splits"}
+          
+          <CardFooter className="pt-6 pb-8">
+            <Button 
+              type="submit" 
+              className="w-full h-14 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 group" 
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin mr-3 h-5 w-5" />
+                  Calculating...
+                </>
+              ) : (
+                <>
+                  Calculate Budget Splits
+                  <span className="ml-2 group-hover:translate-x-1 transition-transform">
+                    <ChevronRight className="h-5 w-5" />
+                  </span>
+                </>
+              )}
             </Button>
           </CardFooter>
         </form>

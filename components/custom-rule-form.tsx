@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,6 +37,9 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
   const [error, setError] = useState<string | null>(null)
   const [testIncome, setTestIncome] = useState(1000) // For validation purposes
 
+  // Refs for each category name input
+  const categoryNameRefs = useRef<Array<HTMLInputElement | null>>([])
+
   useEffect(() => {
     if (editingRule) {
       setRuleName(editingRule.name)
@@ -50,9 +53,22 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
     }
   }, [editingRule])
 
+  // Focus the last category name input after adding a new category
+  useEffect(() => {
+    if (categoryNameRefs.current.length > 0) {
+      const lastIndex = categories.length - 1
+      const lastRef = categoryNameRefs.current[lastIndex]
+      if (lastRef) {
+        lastRef.focus()
+      }
+    }
+    // Only run when categories length increases
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories.length])
+
   const addCategory = () => {
-    setCategories([
-      ...categories,
+    setCategories((prev) => [
+      ...prev,
       {
         name: "",
         percentage: 0,
@@ -75,6 +91,8 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
     const newCategories = [...categories]
     newCategories.splice(index, 1)
     setCategories(newCategories)
+    // Remove the corresponding ref
+    categoryNameRefs.current.splice(index, 1)
   }
 
   const updateCategory = (index: number, field: keyof Category, value: string | number | boolean) => {
@@ -210,9 +228,9 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
   const percentageUsedByFixed = (totalFixedAmount / testIncome) * 100
 
   return (
-    <Card className="w-full">
+    <Card className="w-full backdrop-blur-sm bg-card/95 border border-border/50">
       <CardHeader>
-        <CardTitle>{editingRule ? "Edit Budget Rule" : "Create Custom Budget Rule"}</CardTitle>
+        <CardTitle className="text-xl font-semibold text-foreground">{editingRule ? "Edit Budget Rule" : "Create Custom Budget Rule"}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -228,7 +246,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
         <div className="space-y-2">
           <Label htmlFor="testIncome">Test Income (for validation)</Label>
           <div className="relative">
-            <Euro className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <Euro className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="testIncome"
               type="number"
@@ -239,7 +257,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
               className="pl-10"
             />
           </div>
-          <p className="text-xs text-gray-500">This is used to validate your rule but won't be saved with it.</p>
+          <p className="text-xs text-muted-foreground">This is used to validate your rule but won't be saved with it.</p>
         </div>
 
         <div className="space-y-4">
@@ -251,7 +269,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
           </div>
 
           {categories.map((category, index) => (
-            <div key={index} className="space-y-3 p-4 border rounded-md">
+            <div key={index} className="space-y-3 p-4 border rounded-md bg-muted/15">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded-full" style={{ backgroundColor: category.color }} />
@@ -279,7 +297,8 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
                     placeholder="e.g., Housing"
                     value={category.name}
                     onChange={(e) => updateCategory(index, "name", e.target.value)}
-                  />
+                    // Assign ref for focusing
+                    ref={el => { categoryNameRefs.current[index] = el }}                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -305,7 +324,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
                       Fixed Amount
                     </Label>
                     <div className="relative">
-                      <Euro className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                      <Euro className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         id={`fixed-amount-${index}`}
                         type="number"
@@ -334,7 +353,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
                         onChange={(e) => updateCategory(index, "percentage", e.target.value)}
                         className="pr-8"
                       />
-                      <Percent className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                      <Percent className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     </div>
                   </div>
                 )}
@@ -342,16 +361,16 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
             </div>
           ))}
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <div className="p-4 bg-gray-50 rounded-md space-y-2">
+          <div className="p-4 bg-muted/50 rounded-lg space-y-2 border border-border/30">
             <div className="text-sm">
               <span className="font-medium">Fixed Amounts:</span> €{totalFixedAmount.toFixed(2)}
-              <span className="text-gray-500 ml-1">({percentageUsedByFixed.toFixed(1)}% of test income)</span>
+              <span className="text-muted-foreground ml-1">({percentageUsedByFixed.toFixed(1)}% of test income)</span>
             </div>
             <div className="text-sm">
               <span className="font-medium">Percentage Allocations:</span> {totalPercentage}%
-              {totalPercentage === 100 && <span className="text-green-500 ml-2">✓</span>}
+              {totalPercentage === 100 && <span className="text-primary ml-2">✓</span>}
             </div>
             <div className="text-sm">
               <span className="font-medium">Remaining for Percentages:</span> €
@@ -365,7 +384,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
         <Button variant="outline" onClick={onSave}>
           <X className="h-4 w-4 mr-2" /> Cancel
         </Button>
-        <Button onClick={handleSave} className="bg-[#96DAAF] text-[#1C1B22] hover:bg-[#96DAAF]">
+        <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Save className="h-4 w-4 mr-2" /> Save Rule
         </Button>
       </CardFooter>

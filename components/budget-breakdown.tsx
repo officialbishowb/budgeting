@@ -20,9 +20,15 @@ export default function BudgetBreakdown({ categories, income }: BudgetBreakdownP
   // Calculate remaining income for percentage-based categories
   const remainingIncome = income - totalFixedAmount
 
+  // Sort categories: fixed first, then percentage-based
+  const sortedCategories = [
+    ...categories.filter((cat) => cat.isFixed),
+    ...categories.filter((cat) => !cat.isFixed),
+  ]
+
   return (
     <div className="space-y-3">
-      {categories.map((category, index) => {
+      {sortedCategories.map((category, index) => {
         // Calculate amount based on whether it's fixed or percentage
         let amount = 0
         if (category.isFixed) {
@@ -35,16 +41,26 @@ export default function BudgetBreakdown({ categories, income }: BudgetBreakdownP
         const effectivePercentage = (amount / income) * 100
 
         return (
-          <Card key={index} className="shadow-sm">
-            <CardContent className="p-4 flex justify-between items-center">
-              <div className="flex items-center">
-                <div className="w-5 h-5 rounded-full mr-3 flex-shrink-0" style={{ backgroundColor: category.color }} />
-                <span className="font-medium text-base">{category.name}</span>
+          <Card key={index} className="backdrop-blur-sm bg-card/90 border border-border/30 hover:shadow-md transition-all duration-200">
+            <CardContent className="p-5 flex justify-between items-center">
+              <div className="flex items-center space-x-4">
+                <div 
+                  className="w-6 h-6 rounded-lg shadow-sm flex-shrink-0" 
+                  style={{ backgroundColor: category.color }} 
+                />
+                <span className="font-semibold text-foreground">{category.name}</span>
               </div>
               <div className="text-right">
-                  <div className="font-bold text-base">€{amount.toFixed(2)}</div>
-                <div className="text-sm text-gray-500">
-                  {category.isFixed ? `Fixed (${effectivePercentage.toFixed(1)}%)` : `${category.percentage}%`}
+                <div className="font-bold text-lg text-foreground">€{amount.toFixed(2)}</div>
+                <div className="text-sm text-muted-foreground">
+                  {category.isFixed ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/20 text-primary mr-2">
+                      Fixed
+                    </span>
+                  ) : null}
+                  {category.isFixed
+                    ? `(${effectivePercentage.toFixed(1)}%)`
+                    : `${category.percentage}%`}
                 </div>
               </div>
             </CardContent>
@@ -52,10 +68,10 @@ export default function BudgetBreakdown({ categories, income }: BudgetBreakdownP
         )
       })}
 
-      <Card className="shadow-md mt-4">
-        <CardContent className="p-4 flex justify-between items-center font-bold">
-          <span className="text-lg">Total</span>
-          <span className="text-lg">€{income.toFixed(2)}</span>
+      <Card className="backdrop-blur-sm bg-primary/10 border border-primary/30 shadow-lg mt-6">
+        <CardContent className="p-5 flex justify-between items-center">
+          <span className="text-xl font-bold text-foreground">Total</span>
+          <span className="text-xl font-bold text-primary">€{income.toFixed(2)}</span>
         </CardContent>
       </Card>
     </div>

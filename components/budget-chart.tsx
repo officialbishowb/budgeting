@@ -48,7 +48,7 @@ export default function BudgetChart({ categories, income }: BudgetChartProps) {
   const isMobile = useMobile()
 
   return (
-    <div className="w-full h-[300px] sm:h-[350px]">
+    <div className="w-full h-[350px] sm:h-[400px] p-4">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -56,14 +56,17 @@ export default function BudgetChart({ categories, income }: BudgetChartProps) {
             cx="50%"
             cy="50%"
             labelLine={isMobile ? false : true}
-            outerRadius={isMobile ? 70 : 90}
+            outerRadius={isMobile ? 80 : 110}
+            innerRadius={isMobile ? 30 : 40}
             fill="#8884d8"
             dataKey="value"
+            stroke="none"
             label={
               isMobile
                 ? ({ percentage }) => `${percentage.toFixed(1)}%`
-                : ({ name, percentage }) => `${name} (${percentage.toFixed(1)}%)`
+                : ({ name, percentage }) => `${name}\n${percentage.toFixed(1)}%`
             }
+            
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
@@ -71,17 +74,27 @@ export default function BudgetChart({ categories, income }: BudgetChartProps) {
           </Pie>
           <Tooltip
             formatter={(value: number) => [`€${value.toFixed(2)}`, "Amount"]}
-            contentStyle={{ fontSize: "14px" }}
+            contentStyle={{ 
+              fontSize: "14px",
+              backgroundColor: '#ffffff',
+              border: '1px solid #95daad',
+              borderRadius: '8px',
+              color: '#1c1b22'
+            }}
           />
           <Legend
             layout={isMobile ? "horizontal" : "vertical"}
             verticalAlign={isMobile ? "bottom" : "middle"}
             align={isMobile ? "center" : "right"}
-            wrapperStyle={isMobile ? { fontSize: "12px" } : { fontSize: "14px", right: 0 }}
+            wrapperStyle={
+              isMobile 
+                ? { fontSize: "13px", paddingTop: "20px", color: '#ffffff' }
+                : { fontSize: "14px", right: 0, color: '#ffffff' }
+            }
             formatter={(value, entry: any) => {
               const item = data.find((d) => d.name === value)
               return [
-                <span key={value}>
+                <span key={value} style={{ color: '#ffffff' }}>
                   {value} {item?.isFixed ? "(Fixed)" : ""}
                 </span>,
                 null,

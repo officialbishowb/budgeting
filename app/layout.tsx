@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Budget Splitter',
+  title: 'Budgeting',
   description: 'Split your income with ease using various budget rules',
   icons: {
     icon: [
@@ -26,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className="dark">
+      <body className={`${inter.className} antialiased`}>
         {children}
         <ToastContainer
           position="bottom-right"
@@ -39,7 +39,8 @@ export default function RootLayout({
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="light"
+          theme="dark"
+          toastClassName="bg-card text-foreground border border-border"
         />
       </body>
     </html>
