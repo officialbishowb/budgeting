@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,10 +18,18 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
+  // Load last entered income from localStorage on mount
+  useEffect(() => {
+    const lastIncome = localStorage.getItem("lastIncome")
+    if (lastIncome) setIncome(lastIncome)
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!income || isNaN(Number(income)) || Number(income) <= 0) return
     setLoading(true)
+    // Save last entered income
+    localStorage.setItem("lastIncome", income)
     // Simulate loading for UX (remove setTimeout in production)
     setTimeout(() => {
       router.push(`/results?income=${income}&frequency=${frequency}`)
@@ -75,7 +83,10 @@ export default function Home() {
                   placeholder="Enter your income"
                   className="pl-12 h-14 text-lg bg-input border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
                   value={income}
-                  onChange={(e) => setIncome(e.target.value)}
+                  onChange={(e) => {
+                    setIncome(e.target.value)
+                    localStorage.setItem("lastIncome", e.target.value)
+                  }}
                   required
                 />
               </div>

@@ -11,7 +11,7 @@ import BudgetChart from "@/components/budget-chart"
 import BudgetBreakdown from "@/components/budget-breakdown"
 import { getCustomRules } from "@/lib/utils"
 
-// Budget rule definitions
+// Standard Budget rule definitions
 const predefinedRules = {
   "50-30-20": [
     { name: "Needs", percentage: 50, color: "#4ade80" },
@@ -40,7 +40,9 @@ export default function Results() {
   const searchParams = useSearchParams()
   const [income, setIncome] = useState(0)
   const [frequency, setFrequency] = useState("monthly")
-  const [activeTab, setActiveTab] = useState("50-30-20")
+  const [activeTab, setActiveTab] = useState(
+    localStorage.getItem("lastSelectedRule") || "50-30-20"
+  )
   const [customRules, setCustomRules] = useState<any[]>([])
   const [allRules, setAllRules] = useState<Record<string, any[]>>(predefinedRules)
 
@@ -57,27 +59,24 @@ export default function Results() {
     }
   }, [searchParams])
 
-  // Separate useEffect for loading custom rules to avoid infinite loops
   useEffect(() => {
-    // Load custom rules
     const rules = getCustomRules()
     setCustomRules(rules)
 
-    // Create a combined rules object
     const combined: Record<string, any[]> = { ...predefinedRules }
 
-    // Add custom rules
     rules.forEach((rule: any) => {
       combined[rule.id] = rule.categories
     })
-
     setAllRules(combined)
+  }, [])
 
-    // If there's a custom rule and no active tab is set, select the first custom rule
-    if (rules.length > 0 && activeTab === "50-30-20") {
-      setActiveTab(rules[0].id)
+  // Save activeTab to localStorage when it changes
+  useEffect(() => {
+    if (activeTab) {
+      localStorage.setItem("lastSelectedRule", activeTab)
     }
-  }, []) // Empty dependency array means this only runs once on mount
+  }, [activeTab])
 
   const getFrequencyText = () => {
     switch (frequency) {
