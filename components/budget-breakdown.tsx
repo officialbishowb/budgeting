@@ -24,6 +24,9 @@ export default function BudgetBreakdown({ categories, income }: BudgetBreakdownP
   // Calculate remaining income for percentage-based categories
   const remainingIncome = income - totalFixedAmount
 
+  // Check if all categories are fixed amounts
+  const allFixedCategories = categories.every((cat) => cat.isFixed)
+
   // Sort categories: fixed first, then percentage-based
   const sortedCategories = [
     ...categories.filter((cat) => cat.isFixed),
@@ -113,7 +116,9 @@ export default function BudgetBreakdown({ categories, income }: BudgetBreakdownP
       <Card className="backdrop-blur-sm bg-primary/10 border border-primary/30 shadow-lg mt-6">
         <CardContent className="p-5 flex justify-between items-center">
           <span className="text-xl font-bold text-foreground">Total</span>
-          <span className="text-xl font-bold text-primary">€{income.toFixed(2)}</span>
+          <span className="text-xl font-bold text-primary">
+            {allFixedCategories ? `€${totalFixedAmount.toFixed(2)} / €${income.toFixed(2)}` : `€${income.toFixed(2)}`}
+          </span>
         </CardContent>
       </Card>
     </div>

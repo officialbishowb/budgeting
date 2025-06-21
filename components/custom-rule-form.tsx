@@ -158,8 +158,9 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
     // Calculate total percentage allocations
     const totalPercentage = categories.filter((cat) => !cat.isFixed).reduce((sum, cat) => sum + cat.percentage, 0)
 
-    // Check if percentages add up to 100%
-    if (Math.round(totalPercentage) !== 100) {
+    // Check if percentages add up to 100% only if there are percentage-based categories
+    const hasPercentageCategories = categories.some((cat) => !cat.isFixed)
+    if (hasPercentageCategories && Math.round(totalPercentage) !== 100) {
       setError(`Percentage allocations must add up to 100%. Current total: ${totalPercentage}%`)
       return false
     }
@@ -226,6 +227,9 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
   const totalPercentage = categories.filter((cat) => !cat.isFixed).reduce((sum, cat) => sum + cat.percentage, 0)
 
   const percentageUsedByFixed = (totalFixedAmount / testIncome) * 100
+
+  // Check if all categories are fixed amounts
+  const allFixedCategories = categories.every((cat) => cat.isFixed)
 
   return (
     <Card className="w-full backdrop-blur-sm bg-card/95 border border-border/50">
