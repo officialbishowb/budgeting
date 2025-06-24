@@ -126,19 +126,36 @@ export default function CustomRulesManager() {
             throw new Error("Invalid format")
           }
 
-          // Validate each rule has required properties
-          const isValid = importedRules.every(rule => 
-            rule.id && 
-            rule.name && 
-            Array.isArray(rule.categories) &&
-            rule.categories.every((cat: Category) => 
+          // Validate each rule has required properties and check percentage totals
+          const isValid = importedRules.every(rule => {
+            if (!rule.id || !rule.name || !Array.isArray(rule.categories)) {
+              return false
+            }
+
+            // Check if all categories have valid properties
+            const categoriesValid = rule.categories.every((cat: Category) => 
               cat.name && 
               typeof cat.percentage === 'number' && cat.percentage >= 0 && cat.percentage <= 100 &&
               typeof cat.fixedAmount === 'number' && cat.fixedAmount >= 0 &&
               typeof cat.isFixed === 'boolean' &&
               cat.color
             )
-          )
+
+            if (!categoriesValid) {
+              return false
+            }
+
+            // Check if percentage-based categories add up to 100%
+            const percentageCategories = rule.categories.filter((cat: Category) => !cat.isFixed)
+            if (percentageCategories.length > 0) {
+              const totalPercentage = percentageCategories.reduce((sum: number, cat: Category) => sum + cat.percentage, 0)
+              if (Math.abs(totalPercentage - 100) > 0.01) { // Allow for small floating point errors
+                throw new Error(`Rule "${rule.name}" has percentage categories that don't add up to 100% (current total: ${totalPercentage}%)`)
+              }
+            }
+
+            return true
+          })
 
           if (!isValid) {
             throw new Error("Invalid rule format")
@@ -147,6 +164,22 @@ export default function CustomRulesManager() {
           // Get existing rules
           const existingRulesJSON = localStorage.getItem("customBudgetRules")
           const existingRules = existingRulesJSON ? JSON.parse(existingRulesJSON) : []
+
+          // Check for existing rules with same IDs
+          const duplicateRules = importedRules.filter(importedRule => 
+            existingRules.some((existingRule: CustomRule) => existingRule.id === importedRule.id)
+          )
+
+          if (duplicateRules.length > 0) {
+            toast.warning(`Found ${duplicateRules.length} existing rule(s) with the same ID. These will be skipped.`, {
+              position: "bottom-right",
+              autoClose: 4000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            })
+          }
 
           // Merge rules, avoiding duplicates based on id
           const mergedRules = [...existingRules]
@@ -160,11 +193,25 @@ export default function CustomRulesManager() {
           localStorage.setItem("customBudgetRules", JSON.stringify(mergedRules))
           setCustomRules(mergedRules)
 
+          // Show success message
+          const newRulesCount = mergedRules.length - existingRules.length
+          if (newRulesCount > 0) {
+            toast.success(`Successfully imported ${newRulesCount} new rule(s)`, {
+              position: "bottom-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            })
+          }
+
         } catch (e) {
           console.error("Error importing rules:", e)
-          toast.error("The file format is invalid or corrupted", {
+          const errorMessage = e instanceof Error ? e.message : "The file format is invalid or corrupted"
+          toast.error(errorMessage, {
             position: "bottom-right",
-            autoClose: 3000,
+            autoClose: 4000,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
