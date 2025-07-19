@@ -145,10 +145,10 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
     // Calculate total fixed amounts
     const totalFixedAmount = categories.filter((cat) => cat.isFixed).reduce((sum, cat) => sum + cat.fixedAmount, 0)
 
-    // Check if fixed amounts exceed test income
+    // Check if fixed amounts exceed test income (warning only, not blocking)
     if (totalFixedAmount > testIncome) {
-      setError(`Fixed amounts total €${totalFixedAmount} which exceeds the test income of €${testIncome}`)
-      return false
+      // Show warning but don't block saving since this is just for testing
+      console.warn(`Fixed amounts total €${totalFixedAmount} which exceeds the test income of €${testIncome}`)
     }
 
     // Calculate remaining percentage after fixed amounts
@@ -165,13 +165,11 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
       return false
     }
 
-    // Check if the combination would exceed 100% of income
+    // Check if the combination would exceed 100% of income (warning only, not blocking)
     const percentageUsed = (totalFixedAmount / testIncome) * 100
     if (percentageUsed >= 100) {
-      setError(
-        `Fixed amounts use ${percentageUsed.toFixed(1)}% of income, leaving no room for percentage-based categories`,
-      )
-      return false
+      // Show warning but don't block saving since this is just for testing
+      console.warn(`Fixed amounts use ${percentageUsed.toFixed(1)}% of income, leaving no room for percentage-based categories`)
     }
 
     setError(null)
@@ -261,7 +259,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
               className="pl-10"
             />
           </div>
-          <p className="text-xs text-muted-foreground">This is used to validate your rule but won't be saved with it.</p>
+          <p className="text-xs text-muted-foreground">This is used to validate your rule but won't be saved with it. Validation warnings won't prevent saving.</p>
         </div>
 
         <div className="space-y-4">

@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Edit, Trash2, Euro, Percent, Download, Upload } from "lucide-react"
+import { Plus, Edit, Trash2, Euro, Percent, Download, Upload, Copy } from "lucide-react"
 import { toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import CustomRuleForm from "./custom-rule-form"
+import { generateRandomColor } from "@/lib/utils"
 
 interface Category {
   name: string
@@ -63,6 +64,39 @@ export default function CustomRulesManager() {
     setShowForm(true)
   }
 
+  const handleClone = (rule: CustomRule) => {
+    // Create a copy of the rule with "(Copy)" appended to the name
+    const clonedRule: CustomRule = {
+      ...rule,
+      id: `custom-${Date.now()}`,
+      name: `${rule.name} (Copy)`,
+      categories: rule.categories.map(cat => ({
+        ...cat,
+        color: generateRandomColor() // Generate new colors for the cloned rule
+      }))
+    }
+
+    // Get existing rules from localStorage
+    const existingRulesJSON = localStorage.getItem("customBudgetRules")
+    const existingRules = existingRulesJSON ? JSON.parse(existingRulesJSON) : []
+
+    // Add the cloned rule
+    const updatedRules = [...existingRules, clonedRule]
+
+    // Save to localStorage
+    localStorage.setItem("customBudgetRules", JSON.stringify(updatedRules))
+    setCustomRules(updatedRules)
+
+    toast.success(`Budget rule "${clonedRule.name}" has been created`, {
+      position: "bottom-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    })
+  }
+
   const handleFormClose = () => {
     setShowForm(false)
     setEditingRule(null)
@@ -73,7 +107,20 @@ export default function CustomRulesManager() {
     try {
       const rulesJSON = localStorage.getItem("customBudgetRules")
       if (!rulesJSON) {
-        toast.warning("You haven't created any custom budget rules yet", {
+        toast.info("You haven't created any custom budget rules yet", {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        })
+        return
+      }
+
+      const rules = JSON.parse(rulesJSON)
+      if (!Array.isArray(rules) || rules.length === 0) {
+        toast.info("You haven't created any custom budget rules yet", {
           position: "bottom-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -94,7 +141,14 @@ export default function CustomRulesManager() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-     
+      toast.success(`Successfully exported ${rules.length} rule(s)`, {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      })
     } catch (e) {
       console.error("Error exporting rules:", e)
       toast.error("There was an error exporting your rules", {
@@ -263,10 +317,31 @@ export default function CustomRulesManager() {
                     <CardTitle className="text-lg flex justify-between items-center text-foreground">
                       <span>{rule.name}</span>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" className="hover:bg-accent/10 hover:text-accent" onClick={() => handleEdit(rule)}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="hover:bg-accent/10 hover:text-accent" 
+                          onClick={() => handleClone(rule)}
+                          title="Clone this rule"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="hover:bg-accent/10 hover:text-accent" 
+                          onClick={() => handleEdit(rule)}
+                          title="Edit this rule"
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDelete(rule.id)}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="hover:bg-destructive/10 hover:text-destructive" 
+                          onClick={() => handleDelete(rule.id)}
+                          title="Delete this rule"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
