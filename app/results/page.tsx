@@ -41,7 +41,7 @@ export default function Results() {
   const [income, setIncome] = useState(0)
   const [frequency, setFrequency] = useState("monthly")
   const [activeTab, setActiveTab] = useState(
-    localStorage.getItem("lastSelectedRule") || "50-30-20"
+    typeof window !== "undefined" && localStorage.getItem("lastSelectedRule") ? localStorage.getItem("lastSelectedRule")! : "50-30-20"
   )
   const [customRules, setCustomRules] = useState<any[]>([])
   const [allRules, setAllRules] = useState<Record<string, any[]>>(predefinedRules)
@@ -131,16 +131,17 @@ export default function Results() {
               Back
             </Button>
           </Link>
-          <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-            <Link href="/custom-rules" className="w-full xs:w-auto">
-              <Button variant="outline" size="sm" className="w-full xs:w-auto hover:bg-accent/10 hover:text-accent border-border">
+          {/* Responsive row on big screens, column on small screens */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+            <Link href="/custom-rules" className="w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="w-full sm:w-auto hover:bg-accent/10 hover:text-accent border-border">
                 <Settings className="mr-2 h-4 w-4" />
                 <span className="sm:inline">Manage Rules</span>
                 <span className="sm:hidden">Rules</span>
               </Button>
             </Link>
-            <Link href="/" className="w-full xs:w-auto">
-              <Button variant="ghost" size="sm" className="w-full xs:w-auto hover:bg-accent/10 hover:text-accent">
+            <Link href="/" className="w-full sm:w-auto">
+              <Button variant="ghost" size="sm" className="w-full sm:w-auto hover:bg-accent/10 hover:text-accent">
                 <Home className="mr-2 h-4 w-4" />
                 Home
               </Button>
@@ -161,97 +162,77 @@ export default function Results() {
         </Card>
 
         {/* Responsive Tabs */}
-        <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
+        {/* Responsive Flexbox "Tabs" */}
+        <div className="w-full">
           <div className="relative mb-4 sm:mb-6">
-            {/* Mobile: Scrollable tabs */}
-            <div className="sm:hidden">
-              <div className="overflow-x-auto scrollbar-hide">
-                <TabsList className="inline-flex gap-1 bg-muted/50 backdrop-blur-sm p-2 rounded-lg border border-border/50 min-w-max">
-                  {/* Predefined rules - Mobile */}
-                  {Object.keys(predefinedRules).map((ruleId) => (
-                    <TabsTrigger 
-                      key={ruleId} 
-                      value={ruleId} 
-                      className="px-3 py-2 text-xs font-medium transition-all duration-200 text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-accent/10 hover:text-accent rounded-md whitespace-nowrap flex-shrink-0"
-                    >
-                      {ruleId.replace(/-/g, "/")}
-                    </TabsTrigger>
-                  ))}
+            {/* Responsive: Column on mobile, row on big screens */}
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 bg-muted/50 backdrop-blur-sm p-2 sm:p-3 rounded-lg sm:rounded-xl border border-border/50 min-h-[0] sm:min-h-[60px]">
+              {/* Predefined rules */}
+              {Object.keys(predefinedRules).map((ruleId) => (
+                <Button
+                  key={ruleId}
+                  onClick={() => setActiveTab(ruleId)}
+                  className={`w-full sm:w-auto text-left px-3 bg-transparent py-2 text-xs font-medium transition-all duration-200 text-foreground rounded-md whitespace-nowrap mx-auto
+                    ${activeTab === ruleId
+                      ? "bg-primary/30 text-white"
+                      : ""
+                    }`}
+                >
+                  <span className="md:hidden">{ruleId.replace(/-/g, "/")}</span>
+                  <span className="hidden md:inline">{ruleId.replace(/-/g, "/")} Rule</span>
+                </Button>
+              ))}
 
-                  {/* Custom rules - Mobile */}
-                  {customRules.map((rule) => (
-                    <TabsTrigger 
-                      key={rule.id} 
-                      value={rule.id} 
-                      className="px-3 py-2 text-xs font-medium transition-all duration-200 text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-accent/10 hover:text-accent rounded-md whitespace-nowrap flex-shrink-0"
-                    >
-                      {rule.name.length > 12 ? `${rule.name.substring(0, 12)}...` : rule.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
-            </div>
-
-            {/* Desktop and Tablet: Responsive flex layout */}
-            <div className="hidden sm:block">
-              <TabsList className="flex flex-wrap justify-center gap-2 bg-muted/50 backdrop-blur-sm p-3 rounded-xl border border-border/50 min-h-[60px]">
-                {/* Predefined rules */}
-                {Object.keys(predefinedRules).map((ruleId) => (
-                  <TabsTrigger 
-                    key={ruleId} 
-                    value={ruleId} 
-                    className="px-3 md:px-4 py-2.5 text-xs md:text-sm font-medium transition-all duration-200 text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-accent/10 hover:text-accent rounded-lg whitespace-nowrap flex-shrink-0"
-                  >
-                    <span className="md:hidden">{ruleId.replace(/-/g, "/")}</span>
-                    <span className="hidden md:inline">{ruleId.replace(/-/g, "/")} Rule</span>
-                  </TabsTrigger>
-                ))}
-
-                {/* Custom rules */}
-                {customRules.map((rule) => (
-                  <TabsTrigger 
-                    key={rule.id} 
-                    value={rule.id} 
-                    className="px-3 md:px-4 py-2.5 text-xs md:text-sm font-medium transition-all duration-200 text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-accent/10 hover:text-accent rounded-lg whitespace-nowrap flex-shrink-0"
-                  >
-                    <span className="block truncate max-w-[120px] md:max-w-none">
-                      {rule.name}
-                    </span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+              {/* Custom rules */}
+              {customRules.map((rule) => (
+                <Button
+                  key={rule.id}
+                  onClick={() => setActiveTab(rule.id)}
+                  className={`w-full sm:w-auto text-left px-3 bg-transparent py-2 text-xs font-medium transition-all duration-200 text-foreground rounded-md whitespace-nowrap mx-auto
+                    ${activeTab === rule.id
+                      ? "bg-primary/30 text-white"
+                      : ""
+                    }`}
+                >
+                  <span className="block truncate max-w-[300px] md:max-w-none">
+                    {rule.name}
+                  </span>
+                </Button>
+              ))}
             </div>
           </div>
 
-          {/* Tab Content */}
-          {Object.entries(allRules).map(([ruleId, categories]) => (
-            <TabsContent key={ruleId} value={ruleId} className="space-y-4 sm:space-y-6">
-              <Card className="backdrop-blur-sm bg-card/95 border border-border/50 shadow-lg">
-                <CardHeader className="pb-4 sm:pb-6">
-                  <CardTitle className="text-lg sm:text-xl font-semibold text-foreground">{getRuleName(ruleId)}</CardTitle>
-                  <CardDescription className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                    {getRuleDescription(ruleId)}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 sm:space-y-6">
-                  {/* Chart - Responsive container */}
-                  <div className="w-full overflow-x-auto">
-                    <div className="min-w-[280px] sm:min-w-[400px]">
-                      <BudgetChart categories={categories} income={income} />
+          {/* "Tab" Content */}
+          {Object.entries(allRules).map(([ruleId, categories]) =>
+            activeTab === ruleId ? (
+              <div key={ruleId} className="space-y-4 sm:space-y-6">
+                <Card className="backdrop-blur-sm bg-card/95 border border-border/50 shadow-lg">
+                  <CardHeader className="pb-4 sm:pb-6">
+                    <CardTitle className="text-lg sm:text-xl font-semibold text-foreground">{getRuleName(ruleId)}</CardTitle>
+                    <CardDescription className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                      {getRuleDescription(ruleId)}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 sm:space-y-6">
+                    {/* Chart - Responsive container */}
+                    <div className="w-full overflow-x-auto">
+                      <div className="min-w-[280px] sm:min-w-[400px]">
+                        <BudgetChart categories={categories} income={income} />
+                      </div>
                     </div>
-                  </div>
-                  
-                  {/* Breakdown - Responsive container */}
-                  <div className="w-full overflow-x-auto">
-                    <div className="min-w-[280px] sm:min-w-[400px]">
-                      <BudgetBreakdown categories={categories} income={income} />
+                    
+                    {/* Breakdown - Responsive container */}
+                    <div className="w-full overflow-x-auto">
+                      <div className="min-w-[280px] sm:min-w-[400px]">
+                        <BudgetBreakdown categories={categories} income={income} />
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
-        </Tabs>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null
+          )}
+        </div>
       </div>
     </main>
   )
