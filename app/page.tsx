@@ -60,7 +60,7 @@ export default function Home() {
                 Enter your income to see how it breaks down using different budgeting rules
               </CardDescription>
             </div>
-            <Link href="/custom-rules">
+            <Link href="/settings">
               <Button variant="ghost" size="icon" className="hover:bg-accent/10 hover:text-accent">
                 <Settings className="h-5 w-5" />
               </Button>

@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { type Account } from "@/lib/utils"
+import AccountIcon from "@/components/account-icon"
 
 interface Category {
   name: string
@@ -8,14 +10,16 @@ interface Category {
   fixedAmount?: number
   isFixed?: boolean
   color: string
+  accountId?: string | null
 }
 
 interface BudgetBreakdownProps {
   categories: Category[]
   income: number
+  accounts?: Account[]
 }
 
-export default function BudgetBreakdown({ categories, income }: BudgetBreakdownProps) {
+export default function BudgetBreakdown({ categories, income, accounts = [] }: BudgetBreakdownProps) {
   const [budgeted, setBudgeted] = useState<Set<string>>(new Set())
 
   // Calculate total fixed amounts
@@ -37,6 +41,11 @@ export default function BudgetBreakdown({ categories, income }: BudgetBreakdownP
   const toBudget = sortedCategories.filter(cat => !budgeted.has(cat.name))
   const alreadyBudgeted = sortedCategories.filter(cat => budgeted.has(cat.name))
 
+  const getAccountForCategory = (category: Category): Account | undefined => {
+    if (!category.accountId) return undefined
+    return accounts.find((a) => a.id === category.accountId)
+  }
+
   const renderCard = (category: Category) => {
     let amount = 0
     if (category.isFixed) {
@@ -46,17 +55,35 @@ export default function BudgetBreakdown({ categories, income }: BudgetBreakdownP
     }
     const effectivePercentage = (amount / income) * 100
     const isBudgeted = budgeted.has(category.name)
+    const assignedAccount = getAccountForCategory(category)
+
     return (
       <Card key={category.name} className="backdrop-blur-sm bg-card/90 border border-border/30 hover:shadow-md transition-all duration-200">
-        <CardContent className="p-5 flex justify-between items-center">
+        <CardContent className="p-5 flex flex-col sm:flex-row justify-between gap-3 sm:items-center">
           <div className="flex items-center space-x-4">
-            <div 
-              className="w-6 h-6 rounded-lg shadow-sm flex-shrink-0" 
-              style={{ backgroundColor: category.color }} 
+            <div
+              className="w-6 h-6 rounded-lg shadow-sm flex-shrink-0"
+              style={{ backgroundColor: category.color }}
             />
-            <span className="font-semibold text-foreground">{category.name}</span>
+            <div>
+              <span className="font-semibold text-foreground">{category.name}</span>
+              {assignedAccount && (
+                <div className="mt-1">
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                    style={{
+                      backgroundColor: `color-mix(in srgb, ${assignedAccount.color} 20%, transparent)`,
+                      color: assignedAccount.color,
+                    }}
+                  >
+                    <AccountIcon account={assignedAccount} size={14} />
+                    {assignedAccount.name}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="text-right flex flex-col items-end gap-2">
+          <div className="text-right flex flex-col items-end gap-2 sm:flex-shrink-0">
             <div className="font-bold text-lg text-foreground">€{amount.toFixed(2)}</div>
             <div className="text-sm text-muted-foreground">
               {category.isFixed ? (
@@ -71,6 +98,7 @@ export default function BudgetBreakdown({ categories, income }: BudgetBreakdownP
             <Button
               size="sm"
               variant={isBudgeted ? "secondary" : "outline"}
+              className="w-full sm:w-auto"
               onClick={() => {
                 setBudgeted(prev => {
                   const next = new Set(prev)

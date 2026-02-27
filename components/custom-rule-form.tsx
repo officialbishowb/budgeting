@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, Save, X, Euro, Percent } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { generateRandomColor } from "@/lib/utils"
+import { generateRandomColor, getAccounts, type Account } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
+import AccountIcon from "@/components/account-icon"
 
 interface Category {
   name: string
@@ -16,6 +18,7 @@ interface Category {
   fixedAmount: number
   isFixed: boolean
   color: string
+  accountId?: string | null
 }
 
 interface CustomRuleFormProps {
@@ -31,23 +34,29 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
   const { toast } = useToast()
   const [ruleName, setRuleName] = useState("")
   const [categories, setCategories] = useState<Category[]>([
-    { name: "", percentage: 0, fixedAmount: 0, isFixed: false, color: generateRandomColor() },
-    { name: "", percentage: 0, fixedAmount: 0, isFixed: false, color: generateRandomColor() },
+    { name: "", percentage: 0, fixedAmount: 0, isFixed: false, color: generateRandomColor(), accountId: null },
+    { name: "", percentage: 0, fixedAmount: 0, isFixed: false, color: generateRandomColor(), accountId: null },
   ])
   const [error, setError] = useState<string | null>(null)
   const [testIncome, setTestIncome] = useState(1000) // For validation purposes
+  const [accounts, setAccounts] = useState<Account[]>([])
 
   // Refs for each category name input
   const categoryNameRefs = useRef<Array<HTMLInputElement | null>>([])
 
   useEffect(() => {
+    setAccounts(getAccounts())
+  }, [])
+
+  useEffect(() => {
     if (editingRule) {
       setRuleName(editingRule.name)
-      // Ensure all categories have the isFixed and fixedAmount properties
+      // Ensure all categories have the required properties
       const updatedCategories = editingRule.categories.map((cat) => ({
         ...cat,
         isFixed: cat.isFixed || false,
         fixedAmount: cat.fixedAmount || 0,
+        accountId: cat.accountId ?? null,
       }))
       setCategories(updatedCategories)
     }
@@ -75,6 +84,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
         fixedAmount: 0,
         isFixed: false,
         color: generateRandomColor(),
+        accountId: null,
       },
     ])
   }
@@ -95,7 +105,7 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
     categoryNameRefs.current.splice(index, 1)
   }
 
-  const updateCategory = (index: number, field: keyof Category, value: string | number | boolean) => {
+  const updateCategory = (index: number, field: keyof Category, value: string | number | boolean | null) => {
     const newCategories = [...categories]
 
     if (field === "isFixed") {
@@ -147,13 +157,8 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
 
     // Check if fixed amounts exceed test income (warning only, not blocking)
     if (totalFixedAmount > testIncome) {
-      // Show warning but don't block saving since this is just for testing
       console.warn(`Fixed amounts total €${totalFixedAmount} which exceeds the test income of €${testIncome}`)
     }
-
-    // Calculate remaining percentage after fixed amounts
-    const remainingIncome = testIncome - totalFixedAmount
-    const percentageOfRemaining = (remainingIncome / testIncome) * 100
 
     // Calculate total percentage allocations
     const totalPercentage = categories.filter((cat) => !cat.isFixed).reduce((sum, cat) => sum + cat.percentage, 0)
@@ -168,7 +173,6 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
     // Check if the combination would exceed 100% of income (warning only, not blocking)
     const percentageUsed = (totalFixedAmount / testIncome) * 100
     if (percentageUsed >= 100) {
-      // Show warning but don't block saving since this is just for testing
       console.warn(`Fixed amounts use ${percentageUsed.toFixed(1)}% of income, leaving no room for percentage-based categories`)
     }
 
@@ -211,8 +215,8 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
     if (!editingRule) {
       setRuleName("")
       setCategories([
-        { name: "", percentage: 0, fixedAmount: 0, isFixed: false, color: generateRandomColor() },
-        { name: "", percentage: 0, fixedAmount: 0, isFixed: false, color: generateRandomColor() },
+        { name: "", percentage: 0, fixedAmount: 0, isFixed: false, color: generateRandomColor(), accountId: null },
+        { name: "", percentage: 0, fixedAmount: 0, isFixed: false, color: generateRandomColor(), accountId: null },
       ])
     }
 
@@ -271,7 +275,11 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
           </div>
 
           {categories.map((category, index) => (
-            <div key={index} className="space-y-3 p-4 border rounded-md bg-muted/15">
+            <div
+              key={index}
+              className="space-y-3 p-4 border rounded-md bg-muted/15 border-l-[3px]"
+              style={{ borderLeftColor: category.color }}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded-full" style={{ backgroundColor: category.color }} />
@@ -299,8 +307,8 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
                     placeholder="e.g., Housing"
                     value={category.name}
                     onChange={(e) => updateCategory(index, "name", e.target.value)}
-                    // Assign ref for focusing
-                    ref={el => { categoryNameRefs.current[index] = el }}                  />
+                    ref={el => { categoryNameRefs.current[index] = el }}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -357,6 +365,31 @@ export default function CustomRuleForm({ onSave, editingRule = null }: CustomRul
                       />
                       <Percent className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     </div>
+                  </div>
+                )}
+
+                {accounts.length > 0 && (
+                  <div>
+                    <Label className="text-sm">Account</Label>
+                    <Select
+                      value={category.accountId ?? "none"}
+                      onValueChange={(val) => updateCategory(index, "accountId", val === "none" ? null : val)}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="No Account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No Account</SelectItem>
+                        {accounts.map((account) => (
+                          <SelectItem key={account.id} value={account.id}>
+                            <div className="flex items-center gap-2">
+                              <AccountIcon account={account} size={14} />
+                              {account.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
               </div>

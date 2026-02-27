@@ -4,12 +4,12 @@ import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Home, Settings } from "lucide-react"
 import Link from "next/link"
 import BudgetChart from "@/components/budget-chart"
 import BudgetBreakdown from "@/components/budget-breakdown"
-import { getCustomRules } from "@/lib/utils"
+import AccountSummary from "@/components/account-summary"
+import { getCustomRules, getAccounts, type Account } from "@/lib/utils"
 
 // Standard Budget rule definitions
 const predefinedRules = {
@@ -36,6 +36,8 @@ const predefinedRules = {
   ],
 }
 
+const hasAccountAssignments = (cats: any[]) => cats.some((c) => c.accountId != null)
+
 export default function Results() {
   const searchParams = useSearchParams()
   const [income, setIncome] = useState(0)
@@ -45,6 +47,7 @@ export default function Results() {
   )
   const [customRules, setCustomRules] = useState<any[]>([])
   const [allRules, setAllRules] = useState<Record<string, any[]>>(predefinedRules)
+  const [accounts, setAccounts] = useState<Account[]>([])
 
   useEffect(() => {
     const incomeParam = searchParams.get("income")
@@ -69,6 +72,8 @@ export default function Results() {
       combined[rule.id] = rule.categories
     })
     setAllRules(combined)
+
+    setAccounts(getAccounts())
   }, [])
 
   // Save activeTab to localStorage when it changes
@@ -106,13 +111,13 @@ export default function Results() {
     switch (ruleId) {
         case "50-30-20":
           return "50% for needs (essential expenses), 30% for wants (non-essential spending), and 20% for savings or debt repayment";
-      
+
         case "25-50-15-10":
           return "25% for housing, 50% for necessities (including housing, food, transportation), 15% for savings or investments, and 10% for fun or leisure";
-      
+
         case "60-20-20":
           return "60% for living expenses (all essential and some discretionary), 20% for savings and debt repayment, and 20% for personal spending (e.g., entertainment, hobbies)";
-      
+
         case "70-20-10":
           return "70% for living expenses, 20% for savings or investments, and 10% for savings.";
       }
@@ -121,7 +126,7 @@ export default function Results() {
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-6 bg-background">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/10" />
-      
+
       <div className="relative w-full max-w-6xl">
         {/* Header Navigation */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -220,15 +225,20 @@ export default function Results() {
                         <BudgetChart categories={categories} income={income} />
                       </div>
                     </div>
-                    
+
                     {/* Breakdown - Responsive container */}
                     <div className="w-full overflow-x-auto">
                       <div className="min-w-[280px] sm:min-w-[400px]">
-                        <BudgetBreakdown categories={categories} income={income} />
+                        <BudgetBreakdown categories={categories} income={income} accounts={accounts} />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Account Summary — only for custom rules with account assignments */}
+                {!(ruleId in predefinedRules) && hasAccountAssignments(categories) && (
+                  <AccountSummary categories={categories} income={income} />
+                )}
               </div>
             ) : null
           )}
