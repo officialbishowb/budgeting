@@ -25,7 +25,7 @@ export default function AccountSummary({ categories, income }: AccountSummaryPro
   useEffect(() => {
     const accounts = getAccounts()
     const grouped = groupCategoriesByAccount(categories, accounts, income)
-    setGroups(grouped)
+    setGroups(grouped.sort((a, b) => b.total - a.total))
   }, [categories, income])
 
   if (groups.length === 0) return null
