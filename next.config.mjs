@@ -8,9 +8,7 @@ const withPWA = withPWAInit({
 })
 
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  output: 'standalone',
   typescript: {
     ignoreBuildErrors: true,
   },
