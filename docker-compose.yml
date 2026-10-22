@@ -1,5 +1,5 @@
 services:
-  app:
+  budgeting:
     build: .
     ports:
       - "3002:3000"
